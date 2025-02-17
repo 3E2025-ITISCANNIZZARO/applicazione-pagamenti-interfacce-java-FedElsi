@@ -1,82 +1,129 @@
+import java.util.ArrayList;
+import java.util.List;
+
 // Interfaccia PaymentStrategy
-public interface PaymentStrategy {
+interface PaymentStrategy {
     void pay(double amount);
 }
 
-// Implementazione di PaymentStrategy per il pagamento con carta di credito
-public class CreditCardPayment implements PaymentStrategy {
+// Implementazione del pagamento tramite carta di credito
+class CreditCardPayment implements PaymentStrategy {
     private String cardNumber;
-    private String cardHolder;
+    private String cardHolderName;
+    private String expirationDate;
+    private String cvv;
 
-    public CreditCardPayment(String cardNumber, String cardHolder) {
+    public CreditCardPayment(String cardNumber, String cardHolderName, String expirationDate, String cvv) {
         this.cardNumber = cardNumber;
-        this.cardHolder = cardHolder;
+        this.cardHolderName = cardHolderName;
+        this.expirationDate = expirationDate;
+        this.cvv = cvv;
     }
 
     @Override
     public void pay(double amount) {
-        System.out.println("Pagamento di " + amount + " effettuato con carta di credito.");
+        System.out.println(amount + " pagato con carta di credito.");
     }
 }
 
-// Implementazione di PaymentStrategy per il pagamento tramite PayPal
-public class PayPalPayment implements PaymentStrategy {
+// Implementazione del pagamento tramite PayPal
+class PayPalPayment implements PaymentStrategy {
     private String email;
+    private String password;
 
-    public PayPalPayment(String email) {
+    public PayPalPayment(String email, String password) {
         this.email = email;
+        this.password = password;
     }
 
     @Override
     public void pay(double amount) {
-        System.out.println("Pagamento di " + amount + " effettuato tramite PayPal.");
+        System.out.println(amount + " pagato tramite PayPal.");
     }
 }
 
-// Implementazione di PaymentStrategy per il pagamento tramite bonifico bancario
-public class BankTransferPayment implements PaymentStrategy {
-    private String bankAccount;
+// Implementazione del pagamento tramite bonifico bancario
+class BankTransferPayment implements PaymentStrategy {
+    private String bankAccountNumber;
+    private String bankName;
 
-    public BankTransferPayment(String bankAccount) {
-        this.bankAccount = bankAccount;
+    public BankTransferPayment(String bankAccountNumber, String bankName) {
+        this.bankAccountNumber = bankAccountNumber;
+        this.bankName = bankName;
     }
 
     @Override
     public void pay(double amount) {
-        System.out.println("Pagamento di " + amount + " effettuato tramite bonifico bancario.");
+        System.out.println(amount + " pagato tramite bonifico bancario.");
     }
 }
 
-// Classe ShoppingCart che utilizza una PaymentStrategy
-public class ShoppingCart {
-    private PaymentStrategy paymentStrategy;
+// Classe Item
+class Item {
+    private String name;
+    private double price;
 
-    public ShoppingCart(PaymentStrategy paymentStrategy) {
-        this.paymentStrategy = paymentStrategy;
+    public Item(String name, double price) {
+        this.name = name;
+        this.price = price;
     }
 
-    public void checkout(double amount) {
-        paymentStrategy.pay(amount);
+    public String getName() {
+        return name;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+}
+
+// Classe ShoppingCart
+class ShoppingCart {
+    private List<Item> items;
+
+    public ShoppingCart() {
+        this.items = new ArrayList<>();
+    }
+
+    public void addItem(Item item) {
+        items.add(item);
+    }
+
+    public void removeItem(Item item) {
+        items.remove(item);
+    }
+
+    public double calculateTotal() {
+        double total = 0;
+        for (Item item : items) {
+            total += item.getPrice();
+        }
+        return total;
+    }
+
+    public void pay(PaymentStrategy paymentMethod) {
+        double amount = calculateTotal();
+        paymentMethod.pay(amount);
     }
 }
 
 // Classe Main per testare l'applicazione
 public class Main {
     public static void main(String[] args) {
-        // Creazione di un pagamento con carta di credito
-        PaymentStrategy creditCardPayment = new CreditCardPayment("1234-5678-9876-5432", "Mario Rossi");
-        ShoppingCart cart1 = new ShoppingCart(creditCardPayment);
-        cart1.checkout(100.0);
+        // Creazione degli articoli
+        Item item1 = new Item("Laptop", 1000);
+        Item item2 = new Item("Smartphone", 500);
 
-        // Creazione di un pagamento tramite PayPal
-        PaymentStrategy payPalPayment = new PayPalPayment("mario.rossi@example.com");
-        ShoppingCart cart2 = new ShoppingCart(payPalPayment);
-        cart2.checkout(200.0);
+        // Creazione del carrello
+        ShoppingCart cart = new ShoppingCart();
+        cart.addItem(item1);
+        cart.addItem(item2);
 
-        // Creazione di un pagamento tramite bonifico bancario
-        PaymentStrategy bankTransferPayment = new BankTransferPayment("IT60X0542811101000000123456");
-        ShoppingCart cart3 = new ShoppingCart(bankTransferPayment);
-        cart3.checkout(300.0);
+        // Selezione del metodo di pagamento
+        PaymentStrategy paymentMethod = new CreditCardPayment("1234-5678-9876-5432", "Mario Rossi", "12/25", "123");
+
+        // Esecuzione del pagamento
+        cart.pay(paymentMethod);
     }
 }
 
